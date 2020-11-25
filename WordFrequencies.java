@@ -1,16 +1,19 @@
+import static java.util.Spliterators.spliteratorUnknownSize;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Spliterator;
 import java.util.StringTokenizer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class WordFrequencies {
 
@@ -43,14 +46,8 @@ public class WordFrequencies {
         try { return Files.readString(path); } catch (IOException e) { return "NOT_FOUND"; }
     };
 
-    private static Function<String, List<String>> toSingleTokens = data -> {
-        StringTokenizer tokenizer = new StringTokenizer(data);
-        List<String> tokens = new ArrayList<>();
-        // Split string into tokens
-        while (tokenizer.hasMoreElements()) {
-            // clean all special chars apart form dot and _ to keep imports and variables
-            tokens.add(tokenizer.nextToken().replaceAll("[^a-zA-Z0-9.]", ""));
-        }
-        return tokens;
-    };
+    private static Function<String, List<String>> toSingleTokens = data ->
+        StreamSupport.stream(spliteratorUnknownSize(new StringTokenizer(data).asIterator(), Spliterator.NONNULL), true)
+                .map(o -> ((String)o).replaceAll("[^a-zA-Z0-9.]", ""))
+                .collect(Collectors.toList());
 }
