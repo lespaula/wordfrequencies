@@ -16,7 +16,7 @@ public class WordFrequencies {
 
     static final String rootPath = "ROOT_DIR";
     static final String outputFilename = "frequencies.csv";
-    static final String fileExtensionFilter = ".cpp";
+    static final String fileExtensionFilter = ".java";
 
     public static void main(String[] args) throws Exception {
         PrintStream out = new PrintStream(new File(outputFilename));
