@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class WordFrequencies {
 
-    static final String rootPath = "/Volumes/Dev/Projects/cloud_processing";
+    static final String rootPath = "ROOT_DIR";
     static final String outputFilename = "frequencies.csv";
     static final Predicate<Path> fileExtensionFilter = path -> path.toString().endsWith(".java");
 
