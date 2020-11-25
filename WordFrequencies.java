@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class WordFrequencies {
 
@@ -20,11 +19,11 @@ public class WordFrequencies {
     static final String fileExtensionFilter = ".cpp";
 
     public static void main(String[] args) throws Exception {
-        Stream<Path> stream = Files.walk(Paths.get(rootPath), Integer.MAX_VALUE);
         PrintStream out = new PrintStream(new File(outputFilename));
 
         long start = System.currentTimeMillis();
-        stream.parallel()
+        Files.walk(Paths.get(rootPath), Integer.MAX_VALUE)
+                .parallel()
                 .filter(f -> f.toString().endsWith(fileExtensionFilter))
                 .map(getData)
                 .map(toSingleTokens)
@@ -32,8 +31,8 @@ public class WordFrequencies {
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
                 .entrySet()
                 .stream()
-                // compare entry.value descending
                 .distinct()
+                // compare entry.value descending
                 .sorted((entry1, entry2) -> Long.compare(entry2.getValue(), entry1.getValue()))
                 .forEach(entry -> out.println(entry.getKey() + "," + entry.getValue()));
         out.flush();
