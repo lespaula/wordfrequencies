@@ -1,4 +1,6 @@
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -8,29 +10,34 @@ import java.util.Collection;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.function.Function;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class WordFrequencies {
 
+    static final String rootPath = "ROOT_DIR";
+    static final String outputFilename = "frequencies.csv";
+    static final String fileExtensionFilter = ".cpp";
+
     public static void main(String[] args) throws Exception {
+        Stream<Path> stream = Files.walk(Paths.get(rootPath), Integer.MAX_VALUE);
+        PrintStream out = new PrintStream(new File(outputFilename));
 
-        Path start = Paths.get("YOUR_REPO_START_DIR");
-
-        try (Stream<Path> stream = Files.walk(start, Integer.MAX_VALUE).parallel()) {
-            stream
-                    .filter(f -> f.toString().endsWith(".java"))
-                    .map(getData)
-                    .map(toSingleTokens)
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
-                    .entrySet()
-                    .stream()
-                    // compare entry.value descending
-                    .sorted((entry1, entry2) -> Long.compare(entry2.getValue(), entry1.getValue()))
-                    .forEach(entry -> System.out.println(entry.getKey() + "," + entry.getValue()));
-        }
+        long start = System.currentTimeMillis();
+        stream.parallel()
+                .filter(f -> f.toString().endsWith(fileExtensionFilter))
+                .map(getData)
+                .map(toSingleTokens)
+                .flatMap(Collection::stream)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                .entrySet()
+                .stream()
+                // compare entry.value descending
+                .distinct()
+                .sorted((entry1, entry2) -> Long.compare(entry2.getValue(), entry1.getValue()))
+                .forEach(entry -> out.println(entry.getKey() + "," + entry.getValue()));
+        out.flush();
+        System.out.println("\nFrequency calc took " + (System.currentTimeMillis() - start) + " ms");
     }
 
     private static Function<Path, String> getData = (path) -> {
@@ -59,5 +66,4 @@ public class WordFrequencies {
         }
         return tokens;
     };
-
 }
